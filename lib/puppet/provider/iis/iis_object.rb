@@ -120,7 +120,7 @@ class Puppet::Provider::IISObject < Puppet::Provider
 					appcmd *(['set', self.class.iis_type()] + get_name_args_for_set_no_physical_path() + args)
 				end
 			#	appcmd *(['set', self.class.iis_type(), resource[:name]] + args) if args.length > 0
-			else	
+			else
 				appcmd *(['set', self.class.iis_type(), resource[:name]] + args) if args.length > 0
 			end
 		end

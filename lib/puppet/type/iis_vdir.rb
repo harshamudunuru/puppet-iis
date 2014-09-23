@@ -49,19 +49,21 @@ Puppet::Type.newtype(:iis_vdir) do
     iis_app = self[:iis_app]
     name = self[:name]
 
-    raise Puppet::Error, "name should start with '#{iis_app.chomp('/')}'" unless ensure_trailing_slash(name).start_with?(ensure_trailing_slash(iis_app))
+    if self[:ensure] != :absent
+      raise Puppet::Error, "name should start with '#{iis_app.chomp('/')}'" unless ensure_trailing_slash(name).start_with?(ensure_trailing_slash(iis_app))
 
-    iis_app = iis_app.chomp('/')
-    iis_app += '/' if iis_app.count('/') == 0
+      iis_app = iis_app.chomp('/')
+      iis_app += '/' if iis_app.count('/') == 0 if self[:ensure] == 'present'
 
-    name = ensure_trailing_slash(name)
+      name = ensure_trailing_slash(name)
 
-    if name.length > ensure_trailing_slash(iis_app).length
-      name = name.chomp('/')
+      if name.length > ensure_trailing_slash(iis_app).length
+        name = name.chomp('/')
+      end
+
+      raise Puppet::Error, "iis_vdir name should be '#{name}'" unless self[:name] == name
+      raise Puppet::Error, "iis_vdir attribute iis_app should be set to '#{iis_app}'" unless self[:iis_app] == iis_app
     end
-
-    raise Puppet::Error, "iis_vdir name should be '#{name}'" unless self[:name] == name
-    raise Puppet::Error, "iis_vdir attribute iis_app should be set to '#{iis_app}'" unless self[:iis_app] == iis_app
   end
 
   def ensure_trailing_slash(value)
