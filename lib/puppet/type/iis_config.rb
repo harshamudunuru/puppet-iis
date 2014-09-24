@@ -6,7 +6,7 @@ Puppet::Type.newtype(:iis_config) do
   ensurable
 
   newparam(:name) do
-    desc "Config name"
+    desc "Config section"
   end
 
   newproperty(:enabled, :parent => Puppet::IisProperty) do

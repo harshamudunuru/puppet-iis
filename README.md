@@ -1,23 +1,24 @@
 puppet-iis
 ==========
 
-Puppet module for configuring IIS.  Currently it can configure app pools, sites, applications and virtual directories.
+Puppet module for configuring IIS.  Currently it can configure app pools, sites, applications, virtual directories, settings and custom error pages.
 
-The module is available from: http://forge.puppetlabs.com/simondean/iis
+The module is available from: http://forge.puppetlabs.com/mirdhyn/iis
 
 ## Pre-requisites
 
 - Windows
-- Puppet installed via the Windows Installer
-- IIS installed
+- IIS installed (use [opentable/windowsfeature](https://forge.puppetlabs.com/opentable/windowsfeature) for that matter)
 
 The module works with IIS 7 and 7.5.  It does not work with IIS 6 or earlier as those versions of IIS did not include the appcmd tool.
 
 ## Example Usage
-
-1. Copy the modules\iis directory into C:\ProgramData\PuppetLabs\puppet\etc\modules, so that you have a C:\ProgramData\PuppetLabs\puppet\etc\modules\iis directory.
-2. Create a iis_example.pp file somewhere on your hard disk else with this contents:
 ```puppet
+
+      windowsfeature { 'Web-Server':
+        installsubfeatures => true
+      }
+
       file {'c:/puppet_iis_demo':
         ensure          => directory,
       }
@@ -59,35 +60,36 @@ The module works with IIS 7 and 7.5.  It does not work with IIS 6 or earlier as 
         iis_app         => 'PuppetIisDemo/',
         physicalpath    => 'c:\puppet_iis_demo'
       }
+
+      iis_config { 'system.webServer/caching':
+        enabled           => true,
+        enablekernelcache => true
+      }
+
+        iis_config { 'system.webServer/asp':
+        cache_maxdisktemplatecachefiles => 4000,
+        cache_scriptfilecachesize       => 4500,
+        cache_scriptenginecachemax      => 1000,
+        limits_processorthreadmax       => 100
+      }
+
+      iis_errorpages {'PuppetIisDemo/':
+        error_pages => [{ statusCode   => 404,
+                          path         => '/err/404.asp',
+                          responseMode => 'ExecuteURL' },
+                        { statusCode    => 500,
+                          subStatusCode => 100,
+                          path          => '/err/500.100.asp',
+                          responseMode  => 'ExecuteURL'}]
+      }
 ```
-3. From your Start Menu run: All Programs\Puppet\Start Command Prompt with Puppet
-4. A Puppet command prompt will open.  Change directory to the directory with your iis_example.pp file in and then run this command:
-      puppet apply --debug iis_example.pp
 
 
-## Running the Acceptance Tests
-
-Before you can run the acceptance tests, you need to install the bundler gem and then install the module's "bundle".  You can do this by running: 
-
-```
-    >gem install bundler
-	>bundle install
-```
-
-You can then run the acceptance tests with this command: 
-
-```
-	>bundle exec rake acceptance_test
-```
-
+## Testing
+TODO
 
 ## Tested on:
+- Windows 7 64bit
+- Windows Server 2008 R2 64bit.  
 
-- Tested against the Windows installer version of Puppet on Windows 7 64bit.  
-
-If using the rake build scipt, you need to use Ruby 1.9.2
-
-
-## Copyright
-
-Copyright (c) 2012 Simon Dean. See LICENSE for details.
+If using the rake build scipt, you need to use Ruby >= 1.9.2
