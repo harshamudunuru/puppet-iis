@@ -45,6 +45,10 @@ Puppet::Type.newtype(:iis_config) do
     desc "system.webServer/asp"
   end
 
+  newproperty(:limits_processorthreadmax, :parent => Puppet::IisProperty) do
+    desc "system.webServer/asp"
+  end
+
   newproperty(:allowkeepalive, :parent => Puppet::IisProperty) do
     desc "system.webServer/httpProtocol"
   end
