@@ -37,7 +37,7 @@ Puppet::Type.newtype(:iis_config) do
     desc "system.webServer/asp"
   end
 
-  newproperty(:enableparentpath, :parent => Puppet::IisProperty) do
+  newproperty(:enableparentpaths, :parent => Puppet::IisProperty) do
     desc "system.webServer/asp"
   end
 
