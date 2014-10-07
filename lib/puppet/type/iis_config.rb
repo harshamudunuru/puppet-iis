@@ -109,7 +109,7 @@ Puppet::Type.newtype(:iis_config) do
     desc "system.webServer/staticContent -> use default mimetypes in addition to these manually defined. Default: false."
   end
 
-  newproperty(:mimetypes, :array_matching => :all, :parent => Puppet::Property) do
+  newproperty(:mimetypes, :parent => Puppet::Property) do
     desc "system.webServer/staticContent -> Hash of available mimetypes (ex: {'.html' => 'text/html'})"
   end
 end
