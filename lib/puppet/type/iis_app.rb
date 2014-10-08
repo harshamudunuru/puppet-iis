@@ -15,16 +15,19 @@ Puppet::Type.newtype(:iis_app) do
     desc "Application pool the application is assigned to"
 
     isrequired
+
+  newproperty(:virtualdirectory_physicalpath, :parent => Puppet::IisFileSystemPathProperty) do
+    desc "Physical path of the application"
   end
+
+  newproperty(:virtualdirectorydefaults_logonmethod, :parent => Puppet::IisProperty) do
+    desc "Virtual directory defaults: Logon method for the physical path"
+end
 
   newproperty(:enabledprotocols, :parent => Puppet::IisProperty) do
     desc "Enabled protocols"
   end
 
-  newproperty(:physicalpath, :parent => Puppet::IisFileSystemPathProperty) do
-    desc "Physical path"
-  end
-  
   newproperty(:serviceautostartenabled, :parent => Puppet::IisProperty) do
     desc "Whether autostart is enabled"
   end

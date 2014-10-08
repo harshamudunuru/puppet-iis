@@ -20,13 +20,13 @@ Puppet::Type.type(:iis_app).provide(:iis_app, :parent => Puppet::Provider::IISOb
     path = "/#{path}"
     ["/site.name:#{site_name}", "/path:#{path}"]
   end
-  
+
   def get_name_args_for_set()
     site_name, path = name.split('/', 2)
     path = "/#{path}"
-    ["/app.name:#{name}", "/[path='/'].physicalpath:#{physicalpath}", "/applicationpool:#{applicationpool}", "/enabledprotocols:#{enabledprotocols}"]
+    ["/app.name:#{name}", "/[path='/'].physicalpath:#{virtualdirectory_physicalpath}", "/applicationpool:#{applicationpool}", "/enabledprotocols:#{enabledprotocols}"]
   end
-  
+
   def get_name_args_for_set_no_physical_path()
     site_name, path = name.split('/', 2)
     path = "/#{path}"
