@@ -15,6 +15,24 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
     "site"
   end
 
+	def self.extract_item(item_xml)
+		hash = {}
+
+		item_xml.each_element("descendant-or-self::*") do |element|
+			element.attributes.each do |key, attribute|
+				key = "#{element.xpath}/#{key}".gsub(/\/appcmd\/[^\/]+\/([^\/]+\/)?/, "").gsub("/", "_").downcase
+				case key
+				when "application_virtualdirectory_physicalpath" # physical path
+					hash[:physicalpath] = attribute
+				else
+					hash[key.to_sym] = attribute if resource_type.validproperty? key
+				end
+			end
+		end
+		hash.merge! extract_complex_properties(item_xml)
+		hash
+	end
+
   def self.extract_complex_properties(item_xml)
     bindings = []
 
@@ -52,4 +70,24 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
         nil
     end
   end
+
+	def execute_flush
+		if @resource[:ensure] != :absent
+			args = get_property_args()
+			if @resource[:physicalpath]
+				appcmd *(['set', self.class.iis_type()] + get_name_args_for_set)
+			else
+				appcmd *(['set', self.class.iis_type()] + get_name_args_for_set_no_physical_path + args)
+			end
+		end
+	end
+
+	def get_name_args_for_set
+		["/site.name:#{name}", "/application[path='/'].virtualdirectory[path='/'].physicalpath:#{physicalpath}"]
+	end
+
+	def get_name_args_for_set_no_physical_path
+		"/site.name:#{name}"
+	end
+
 end

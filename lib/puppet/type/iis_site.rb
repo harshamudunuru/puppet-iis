@@ -9,6 +9,10 @@ Puppet::Type.newtype(:iis_site) do
     desc "Site name"
   end
 
+  newproperty(:physicalpath, :parent => Puppet::IisProperty) do
+    desc "Physical path of the site"
+  end
+
   newproperty(:id, :parent => Puppet::IisProperty) do
     desc "Number assigned to a site when it is created. Default Web Site has an id of 1. Other sites are assigned a random id by IIS when they are created"
   end
