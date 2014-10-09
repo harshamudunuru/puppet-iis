@@ -1,4 +1,4 @@
-.323: text/h323"
+'.323': text/h323
 .aaf: application/octet-stream
 .aca: application/octet-stream
 .accdb: application/msaccess
@@ -18,7 +18,7 @@
 .asm: text/plain
 .asr: video/x-ms-asf
 .asx: video/x-ms-asf
-.atom: application/atom+xml
+.atom: 'application/atom+xml'
 .au: audio/basic
 .avi: video/x-msvideo
 .axs: application/olescript
@@ -101,7 +101,7 @@
 .ics: application/octet-stream
 .ief: image/ief
 .iii: application/x-iphone
-.inf: application/octet-stream
+'.inf': application/octet-stream
 .ins: application/x-internet-signup
 .isp: application/x-internet-signup
 .IVF: video/x-ivf
@@ -168,7 +168,7 @@
 .onetoc2: application/onenote
 .onetmp: application/onenote
 .onepkg: application/onenote
-.osdx: application/opensearchdescription+xml
+.osdx: 'application/opensearchdescription+xml'
 .p10: application/pkcs10
 .p12: application/x-pkcs12
 .p7b: application/x-pkcs7-certificates
@@ -252,7 +252,7 @@
 .stl: application/vnd.ms-pki.stl
 .sv4cpio: application/x-sv4cpio
 .sv4crc: application/x-sv4crc
-.svg: image/svg+xml
+.svg: 'image/svg+xml'
 .swf: application/x-shockwave-flash
 .t: application/x-troff
 .tar: application/x-tar
@@ -312,13 +312,13 @@
 .wvx: video/x-ms-wvx
 .x: application/directx
 .xaf: x-world/x-vrml
-.xaml: application/xaml+xml
+.xaml: 'application/xaml+xml'
 .xap: application/x-silverlight-app
 .xbap: application/x-ms-xbap
 .xbm: image/x-xbitmap
 .xdr: text/plain
-.xht: application/xhtml+xml
-.xhtml: application/xhtml+xml
+.xht: 'application/xhtml+xml'
+.xhtml: 'application/xhtml+xml'
 .xla: application/vnd.ms-excel
 .xlam: application/vnd.ms-excel.addin.macroEnabled.12
 .xlc: application/vnd.ms-excel

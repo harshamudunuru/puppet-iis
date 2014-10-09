@@ -53,7 +53,7 @@ Puppet::Type.newtype(:iis_vdir) do
       raise Puppet::Error, "name should start with '#{iis_app.chomp('/')}'" unless ensure_trailing_slash(name).start_with?(ensure_trailing_slash(iis_app))
 
       iis_app = iis_app.chomp('/')
-      iis_app += '/' if iis_app.count('/') == 0 if self[:ensure] == 'present'
+      iis_app += '/' if iis_app.count('/') == 0 and self[:ensure] != 'absent'
 
       name = ensure_trailing_slash(name)
 

@@ -79,10 +79,10 @@ Puppet::Type.type(:iis_config).provide(:iis_config, :parent => Puppet::Provider:
     args = nil
 
     case name
-    when :documents
-      (args ||= []) << @initial_properties[:documents].map do |doc|
+    when :default_documents
+      (args ||= []) << @initial_properties[:default_documents].map do |doc|
         "\"/-files.[value='#{doc}']\""
-      end unless @initial_properties[:documents].nil?
+      end unless @initial_properties[:default_documents].nil?
 
       (args ||= []) << value.map do |doc|
         "\"/+files.[@end,value='#{doc}']\""
@@ -107,7 +107,12 @@ Puppet::Type.type(:iis_config).provide(:iis_config, :parent => Puppet::Provider:
     args
   end
 
-   def execute_flush
+  def execute_create
+    # Only set is available for configs, even if the config doesn't exist yet
+    execute_flush
+  end
+
+  def execute_flush
     args = Array(get_property_args())
     args.each do |arg|
       appcmd 'set', self.class.iis_type(), "/section:#{resource[:name]}", arg
