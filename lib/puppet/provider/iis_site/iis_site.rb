@@ -75,7 +75,7 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
 		if @resource[:ensure] != :absent
 			args = get_property_args()
 			if @resource[:physicalpath]
-				appcmd *(['set', self.class.iis_type()] + get_name_args_for_set)
+				appcmd *(['set', self.class.iis_type()] + get_name_args_for_set + args)
 			else
 				appcmd *(['set', self.class.iis_type()] + get_name_args_for_set_no_physical_path + args)
 			end
@@ -83,11 +83,11 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
 	end
 
 	def get_name_args_for_set
-		["/site.name:#{name}", "/application[path='/'].virtualdirectory[path='/'].physicalpath:#{physicalpath}"]
+		["/app.name:#{name}", "/application[path='/'].virtualdirectory[path='/'].physicalpath:#{physicalpath}"]
 	end
 
 	def get_name_args_for_set_no_physical_path
-		"/site.name:#{name}"
+		"/app.name:#{name}"
 	end
 
 end
