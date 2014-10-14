@@ -17,6 +17,10 @@ Puppet::Type.newtype(:iis_config) do
     desc "Used for controlling the location of configuration changes. If not specified, changes will be applied at server level."
   end
 
+  newparam(:commit) do
+    desc "Choose commit path. Default: APPHOST"
+  end
+
   newproperty(:enabled, :parent => Puppet::IisProperty) do
     desc "Can be used in multiple configuration sections"
   end
