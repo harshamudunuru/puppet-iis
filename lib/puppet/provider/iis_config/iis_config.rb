@@ -115,7 +115,7 @@ Puppet::Type.type(:iis_config).provide(:iis_config, :parent => Puppet::Provider:
   def execute_flush
     args = Array(get_property_args())
     section, path = get_section_and_path
-    appcmd *(['set', self.class.iis_type(), path, "/section:#{section}"] + args)
+    appcmd *(['set', self.class.iis_type(), path, "/section:#{section}"] + args, "/commit:APPHOST")
   end
 
   def execute_delete
