@@ -121,7 +121,7 @@ Puppet::Type.newtype(:iis_config) do
     desc "system.webServer/staticContent -> Hash of available mimetypes (ex: {'.html' => 'text/html'})"
   end
 
-  newproperty(:clientcache_cachecontrolmode, :parent => Puppet::IisProperty) do
+  newproperty(:clientcache_cachecontrolmode, :parent => Puppet::Iis Property) do
     desc "system.webServer/staticContent -> Possible values: NoControl, DisableCache, UseMaxAge and UseExpires"
     validate do |value|
       unless value =~ /^NoControl$|^DisableCache$|^UseMaxAge$|^UseExpires$/
@@ -131,6 +131,10 @@ Puppet::Type.newtype(:iis_config) do
   end
 
   newproperty(:clientcache_cachecontrolmaxage, :parent => Puppet::IisProperty) do
+    desc "system.webServer/staticContent"
+  end
+
+  newproperty(:clientcache_httpexpires, :parent => Puppet::IisProperty) do
     desc "system.webServer/staticContent"
   end
 
