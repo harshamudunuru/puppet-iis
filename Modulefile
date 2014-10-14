@@ -1,5 +1,5 @@
 name 'mirdhyn-iis'
-version '0.1.6'
+version '0.1.7'
 summary 'Puppet module for configuring IIS (fork of simondean/iis). Currently it can configure app pools, sites, applications, virtual directories, settings and custom error pages.'
 description 'Puppet module for configuring IIS (fork of simondean/iis). Currently it can configure app pools, sites, applications, virtual directories, settings and custom error pages.'
 project_page 'https://github.com/mirdhyn/puppet-iis'
