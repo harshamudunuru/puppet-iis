@@ -9,6 +9,14 @@ Puppet::Type.newtype(:iis_config) do
     desc "Config section"
   end
 
+  newparam(:config_section) do
+    desc "Config section (if not used as name)"
+  end
+
+  newparam(:path) do
+    desc "Used for controlling the location of configuration changes. If not specified, changes will be applied at server level."
+  end
+
   newproperty(:enabled, :parent => Puppet::IisProperty) do
     desc "Can be used in multiple configuration sections"
   end
@@ -112,4 +120,18 @@ Puppet::Type.newtype(:iis_config) do
   newproperty(:mimetypes, :parent => Puppet::Property) do
     desc "system.webServer/staticContent -> Hash of available mimetypes (ex: {'.html' => 'text/html'})"
   end
+
+  newproperty(:clientcache_cachecontrolmode, :parent => Puppet::IisProperty) do
+    desc "system.webServer/staticContent -> Possible values: NoControl, DisableCache, UseMaxAge and UseExpires"
+    validate do |value|
+      unless value =~ /^NoControl$|^DisableCache$|^UseMaxAge$|^UseExpires$/
+        raise ArgumentError, "%s is not a valid value. Possible values are NoControl, DisableCache, UseMaxAge and UseExpires" % value
+      end
+    end
+  end
+
+  newproperty(:clientcache_cachecontrolmaxage, :parent => Puppet::IisProperty) do
+    desc "system.webServer/staticContent"
+  end
+
 end

@@ -114,13 +114,19 @@ Puppet::Type.type(:iis_config).provide(:iis_config, :parent => Puppet::Provider:
 
   def execute_flush
     args = Array(get_property_args())
-    args.each do |arg|
-      appcmd 'set', self.class.iis_type(), "/section:#{resource[:name]}", arg
-    end
+    section, path = get_section_and_path
+    appcmd *(['set', self.class.iis_type(), path, "/section:#{section}"] + args)
   end
 
   def execute_delete
-    appcmd 'clear', self.class.iis_type(), "/section:#{resource[:name]}"
+    section, path = get_section_and_path
+    appcmd 'clear', self.class.iis_type(), path, "/section:#{section}"
+  end
+
+  def get_section_and_path
+    section = resource[:config_section] ? resource[:config_section] : resource[:name]
+    path = resource[:path] ? resource[:path] : ""
+    return section, path
   end
 
 end
