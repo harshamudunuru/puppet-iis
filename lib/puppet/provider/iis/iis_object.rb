@@ -99,7 +99,7 @@ class Puppet::Provider::IISObject < Puppet::Provider
   end
 
   def execute_create
-    appcmd *(['add', self.class.iis_type()] + get_name_args() + get_property_args())
+    appcmd *(['add', self.class.iis_type()] + get_name_args + get_property_args)
   end
 
   def get_name_args
@@ -113,7 +113,7 @@ class Puppet::Provider::IISObject < Puppet::Provider
   def execute_flush
     if @resource[:ensure] != :absent
       args = get_property_args()
-			appcmd *(['set', self.class.iis_type(), resource[:name]] + args) if args.length > 0
+			appcmd *(['set', self.class.iis_type(), resource[:name]] + args) unless args.empty?
 		end
   end
 

@@ -43,51 +43,62 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
     { :bindings => bindings }
   end
 
-  def get_complex_property_arg(name, value)
-    case name
-      when :bindings
-        value ||= []
-        initial_value = @initial_properties[name] || []
+	def get_complex_property_arg(name, value)
+		args = nil
+		case name
+		when :bindings
+			(args ||= []) << "/bindings:#{resource[:bindings].join(',')}"
+		end
+		args
+	end
 
-        unchanged_bindings = value & initial_value
-        bindings_to_add = value - unchanged_bindings
-        bindings_to_remove = initial_value - unchanged_bindings
+  def get_flush_args
+		args = []
+		self.class.resource_type.validproperties.each do |name|
+			if name != :ensure
+				value = @resource.should(name)
 
-        args = []
+				if not value.nil? and value != @initial_properties[name]
+					case name
+					when :physicalpath
+						args << "/[path='/'].[path='/'].physicalPath:#{value}"
 
-        bindings_to_add.collect do |binding|
-          parts = binding.split('/', 2)
-          args << "/+bindings.[protocol='#{parts[0]}',bindingInformation='#{parts[1]}']"
-        end
+					when :bindings
+						value ||= []
+						initial_value = @initial_properties[name] || []
 
-        bindings_to_remove.collect do |binding|
-          parts = binding.split('/', 2)
-          args << "/-bindings.[protocol='#{parts[0]}',bindingInformation='#{parts[1]}']"
-        end
+						unchanged_bindings = value & initial_value
+						bindings_to_add = value - unchanged_bindings
+						bindings_to_remove = initial_value - unchanged_bindings
 
-        args
-      else
-        nil
-    end
+						bindings_to_add.collect do |binding|
+							parts = binding.split('/', 2)
+							args << "/+bindings.[protocol='#{parts[0]}',bindingInformation='#{parts[1]}']"
+						end
+
+						bindings_to_remove.collect do |binding|
+							parts = binding.split('/', 2)
+							args << "/-bindings.[protocol='#{parts[0]}',bindingInformation='#{parts[1]}']"
+						end
+					end
+				end
+			end
+		end
+		args
   end
+
+	def execute_create
+		appcmd *(['add', self.class.iis_type()] + get_name_arg + get_property_args)
+	end
 
 	def execute_flush
 		if @resource[:ensure] != :absent
-			args = get_property_args()
-			if @resource[:physicalpath]
-				appcmd *(['set', self.class.iis_type()] + get_name_args_for_set + args)
-			else
-				appcmd *(['set', self.class.iis_type()] + get_name_args_for_set_no_physical_path + args)
-			end
+			appcmd *(['set', self.class.iis_type(), resource[:name]] + get_flush_args)
 		end
 	end
 
-	def get_name_args_for_set
-		["/app.name:#{name}", "/application[path='/'].virtualdirectory[path='/'].physicalpath:#{physicalpath}"]
-	end
-
-	def get_name_args_for_set_no_physical_path
-		"/app.name:#{name}"
+	def get_name_arg
+		["/site.name:#{resource[:name]}"]
 	end
 
 end
