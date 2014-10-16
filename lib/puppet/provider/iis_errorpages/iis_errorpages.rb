@@ -70,7 +70,7 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
       @initial_properties[:error_pages].each do |page|
         args << "\"/-[" + page.map{|k,v| "#{k}='#{v}'"}.join(',') + "]\""
       end unless @initial_properties[:error_pages].nil?
-      
+
       value.each do |page|
         args << "\"/+[" + page.map{|k,v| "#{k}='#{v}'"}.join(',') + "]\""
       end
@@ -81,7 +81,7 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
 
   def execute_flush
     get_property_args.each do |arg|
-      appcmd 'set', 'config', @resource[:name], "/section:system.webServer/httpErrors", arg
+      appcmd 'set', 'config', @resource[:name], "/section:system.webServer/httpErrors", arg, "/commit:apphost"
     end
   end
 
