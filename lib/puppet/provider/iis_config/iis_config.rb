@@ -113,7 +113,7 @@ Puppet::Type.type(:iis_config).provide(:iis_config, :parent => Puppet::Provider:
   end
 
   def execute_flush
-    args = Array(get_property_args())
+    args = Array(get_property_args)
     section, path = get_section_and_path
     commit = resource[:commit] ? resource[:commit] : "apphost"
     appcmd *(['set', self.class.iis_type(), path, "/commit:#{commit}", "/section:#{section}"] + args ) unless args.empty?

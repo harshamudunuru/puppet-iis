@@ -55,32 +55,28 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
   def get_flush_args
 		args = []
 		self.class.resource_type.validproperties.each do |name|
-			if name != :ensure
-				value = @resource.should(name)
+			value = resource[name.to_sym] unless name == :ensure
 
-				if not value.nil? and value != @initial_properties[name]
-					case name
-					when :physicalpath
-						args << "/[path='/'].[path='/'].physicalPath:#{value}"
+			case name
+			when :physicalpath
+				args << "/[path='/'].[path='/'].physicalPath:#{value}"
 
-					when :bindings
-						value ||= []
-						initial_value = @initial_properties[name] || []
+			when :bindings
+				value ||= []
+				initial_value = @initial_properties[name] || []
 
-						unchanged_bindings = value & initial_value
-						bindings_to_add = value - unchanged_bindings
-						bindings_to_remove = initial_value - unchanged_bindings
+				unchanged_bindings = value & initial_value
+				bindings_to_add = value - unchanged_bindings
+				bindings_to_remove = initial_value - unchanged_bindings
 
-						bindings_to_add.collect do |binding|
-							parts = binding.split('/', 2)
-							args << "/+bindings.[protocol='#{parts[0]}',bindingInformation='#{parts[1]}']"
-						end
+				bindings_to_add.collect do |binding|
+					parts = binding.split('/', 2)
+					args << "/+bindings.[protocol='#{parts[0]}',bindingInformation='#{parts[1]}']"
+				end
 
-						bindings_to_remove.collect do |binding|
-							parts = binding.split('/', 2)
-							args << "/-bindings.[protocol='#{parts[0]}',bindingInformation='#{parts[1]}']"
-						end
-					end
+				bindings_to_remove.collect do |binding|
+					parts = binding.split('/', 2)
+					args << "/-bindings.[protocol='#{parts[0]}',bindingInformation='#{parts[1]}']"
 				end
 			end
 		end
@@ -93,7 +89,7 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
 
 	def execute_flush
 		if @resource[:ensure] != :absent
-			appcmd *(['set', self.class.iis_type(), resource[:name]] + get_flush_args)
+			appcmd *(['set', self.class.iis_type(), resource[:name]] + get_flush_args) unless get_flush_args.empty?
 		end
 	end
 
