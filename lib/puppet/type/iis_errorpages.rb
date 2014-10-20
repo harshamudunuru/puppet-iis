@@ -20,4 +20,8 @@ Puppet::Type.newtype(:iis_errorpages) do
         }
       """
   end
+
+  newparam(:commit) do
+    desc "Choose commit path. Default: apphost"
+  end
 end

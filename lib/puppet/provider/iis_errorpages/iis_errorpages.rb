@@ -66,13 +66,15 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
 
     case name
     when :error_pages
-      args = []
-      @initial_properties[:error_pages].each do |page|
-        args << "\"/-[" + page.map{|k,v| "#{k}='#{v}'"}.join(',') + "]\""
-      end unless @initial_properties[:error_pages].nil?
+      to_remove = @initial_properties[:error_pages].reject{|x| if value.include?(x); x end}
+      to_add = value.reject{|x| if @initial_properties[:error_pages].include?(x); x end}
 
-      value.each do |page|
-        args << "\"/+[" + page.map{|k,v| "#{k}='#{v}'"}.join(',') + "]\""
+      to_remove.map do |page|
+        (args ||= []) << "\"/-[" + page.map{|k,v| "#{k}='#{v}'" if k =~ /statusCode/i}.join(',') + "]\""
+      end unless to_remove.empty?
+
+      to_add.map do |page|
+        (args ||= []) << "\"/+[" + page.map{|k,v| "#{k}='#{v}'"}.join(',') + "]\""
       end
     end
 
@@ -80,9 +82,8 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
   end
 
   def execute_flush
-    get_property_args.each do |arg|
-      appcmd 'set', 'config', @resource[:name], "/section:system.webServer/httpErrors", arg, "/commit:apphost"
-    end
+    commit = resource[:commit] ? resource[:commit] : "apphost"
+    appcmd *(['set', 'config', @resource[:name], "/commit:#{commit}", "/section:system.webServer/httpErrors"] + get_property_args)
   end
 
  def execute_delete
