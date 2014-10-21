@@ -15,33 +15,68 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
     "site"
   end
 
-	def self.extract_item(item_xml)
+	def self.instances(resources)
+		list(resources).map do |hash|
+			hash[:ensure] = :present
+			new(hash)
+		end
+	end
+
+	# Match resources to providers where the resource name matches the provider name
+	def self.prefetch(resources)
+		providers = Hash[instances(resources).map { |provider| [provider.name, provider] }]
+
+		resources.each do |name, resource|
+			provider = providers[name]
+
+			if provider
+				resource.provider = provider
+			else
+				resource.provider = new(:ensure => :absent)
+			end
+		end
+	end
+
+	def self.list(resources)
+		res = []
+		resources.each do |name, resource|
+			command_and_args = [command(:appcmd), 'list', iis_type(), name, '/xml', '/config:*']
+			command_line = command_and_args.flatten.map(&:to_s).join(" ")
+
+			output = execute(command_and_args, :failonfail => false)
+			raise Puppet::ExecutionFailure, "Execution of '#{command_line}' failed" if output.nil? or output.length == 0
+			hash = extract_items(output)
+			res << hash unless hash.empty?
+		end
+		res
+	end
+
+	def self.extract_items(xml)
 		hash = {}
 
-		item_xml.each_element("descendant-or-self::*") do |element|
+		REXML::Document.new(xml).each_element("descendant-or-self::*") do |element|
 			element.attributes.each do |key, attribute|
 				key = "#{element.xpath}/#{key}".gsub(/\/appcmd\/[^\/]+\/([^\/]+\/)?/, "").gsub("/", "_").downcase
 				case key
-				when "application_virtualdirectory_physicalpath" # physical path
-					hash[:physicalpath] = attribute
+
+				when "name"
+					hash[:name] = attribute
+					hash[:provider] = self.name
+					hash[:ensure] = :present
+
+				when /application.*_virtualdirectory.*_physicalpath/
+					hash[:physicalpath] = attribute if (element.attributes["path"] == '/') and (element.parent.attributes["path"] == '/')
+
+				when "bindings"
+					hash[:bindings] = attribute.split(',')
+
 				else
 					hash[key.to_sym] = attribute if resource_type.validproperty? key
 				end
 			end
 		end
-		hash.merge! extract_complex_properties(item_xml)
 		hash
 	end
-
-  def self.extract_complex_properties(item_xml)
-    bindings = []
-
-    item_xml.each_element("bindings/binding") do |binding_xml|
-      bindings << "#{binding_xml.attributes["protocol"]}/#{binding_xml.attributes["bindingInformation"]}"
-    end
-
-    { :bindings => bindings }
-  end
 
 	def get_complex_property_arg(name, value)
 		args = nil
@@ -63,7 +98,7 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
 
 			when :bindings
 				value ||= []
-				initial_value = @initial_properties[name] || []
+				initial_value = @initial_properties[name] ||= []
 
 				unchanged_bindings = value & initial_value
 				bindings_to_add = value - unchanged_bindings

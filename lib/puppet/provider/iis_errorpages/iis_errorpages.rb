@@ -36,6 +36,7 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
       end
     end
   end
+  
   def self.list(resources)
     res = []
     resources.each do |name, resource|
