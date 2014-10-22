@@ -1,79 +1,73 @@
 puppet-iis
 ==========
 
-Puppet module for configuring IIS.  Currently it can configure app pools, sites, applications, virtual directories, settings and custom error pages.
+Puppet module for configuring IIS. It can configure application pools, sites, applications, virtual directories, settings and custom error pages.
 
-The module is available from: http://forge.puppetlabs.com/mirdhyn/iis
+The module is available on puppet forge: http://forge.puppetlabs.com/mirdhyn/iis
+Report issues there: https://github.com/mirdhyn/puppet-iis/issues
+
+Comments and/or remarks are welcome!
 
 ## Pre-requisites
 
 - Windows
 - IIS installed (use [opentable/windowsfeature](https://forge.puppetlabs.com/opentable/windowsfeature) for that matter)
 
-The module works with IIS 7 and 7.5.  It does not work with IIS 6 or earlier as those versions of IIS did not include the appcmd tool.
+The module works with IIS 7+.  It does not work with IIS 6 or earlier as those versions of IIS did not include the appcmd tool.
 
 ## Example Usage
 ```puppet
-
-      windowsfeature { 'Web-Server':
-        installsubfeatures => true
-      }
-
-      file {'c:/puppet_iis_demo':
-        ensure          => directory,
-      }
-
-      file {'c:/puppet_iis_demo/default.aspx':
-        content         =>
-'<%@ Page Language="C#" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Managed by Puppet</title>
-</head>
-<body>
-    <h1>Managed by Puppet</h1>
-
-    <strong>Time:</strong> <%= DateTime.UtcNow.ToString("s") + "Z" %>
-</body>
-</html>'
-      }
-
-      iis_apppool {'PuppetIisDemo':
+      iis_apppool { 'PuppetIisDemo':
         ensure                => present,
         managedpipelinemode   => 'Integrated',
         managedruntimeversion => 'v2.0',
       }
 
-      iis_site {'PuppetIisDemo':
-        ensure          => present,
-        bindings        => ["http/*:25999:"],
+
+      iis_site { 'PuppetIisDemo':
+        ensure       => present,
+        bindings     => ["http/*:8000:"],
+        physicalpath => 'c:\puppet_iis_demo'
       }
 
-      iis_app {'PuppetIisDemo/':
+
+      iis_vdir { 'PuppetIisDemo/JSCache':
+        ensure       => present,
+        iis_app      => 'PuppetIisDemo/',
+        physicalpath => 'c:\puppet_iis_demo\Javascript'
+      }
+
+
+      iis_app { 'Default Web Site/JSCache/MINIFIED':
         ensure          => present,
         applicationpool => 'PuppetIisDemo',
+        physicalpath    => 'c:\puppet_iis_demo\Javascript\Javascript\MINIFIED'
       }
 
-      iis_vdir {'PuppetIisDemo/':
-        ensure          => present,
-        iis_app         => 'PuppetIisDemo/',
-        physicalpath    => 'c:\puppet_iis_demo'
-      }
 
       iis_config { 'system.webServer/caching':
         enabled           => true,
         enablekernelcache => true
       }
 
-        iis_config { 'system.webServer/asp':
+
+      iis_config { 'system.webServer/asp':
         cache_maxdisktemplatecachefiles => 4000,
         cache_scriptfilecachesize       => 4500,
         cache_scriptenginecachemax      => 1000,
         limits_processorthreadmax       => 100
       }
 
-      iis_errorpages {'PuppetIisDemo/':
+
+      iis_config { 'cache expiration for /JSCache':
+        config_section                 => 'system.webServer/staticContent',
+        path                           => 'Default Web Site/JSCache',
+        clientcache_cachecontrolmode   => 'UseMaxAge',
+        clientcache_cachecontrolmaxage => '730.00:00:00'
+      }
+
+
+      iis_errorpages { 'PuppetIisDemo/':
         error_pages => [{ statusCode   => 404,
                           path         => '/err/404.asp',
                           responseMode => 'ExecuteURL' },
@@ -86,10 +80,7 @@ The module works with IIS 7 and 7.5.  It does not work with IIS 6 or earlier as 
 
 
 ## Testing
-TODO
+WIP (Manually tested on Windows Server 2008 R2 64bit)
 
-## Tested on:
-- Windows 7 64bit
-- Windows Server 2008 R2 64bit.  
-
+## Notes
 If using the rake build scipt, you need to use Ruby >= 1.9.2

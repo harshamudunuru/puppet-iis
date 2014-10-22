@@ -38,7 +38,7 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
 	end
 
 	def self.list(resources)
-		res = []
+		resources_list = []
 		resources.each do |name, resource|
 			command_and_args = [command(:appcmd), 'list', iis_type(), name, '/xml', '/config:*']
 			command_line = command_and_args.flatten.map(&:to_s).join(" ")
@@ -46,9 +46,9 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
 			output = execute(command_and_args, :failonfail => false)
 			raise Puppet::ExecutionFailure, "Execution of '#{command_line}' failed" if output.nil? or output.length == 0
 			hash = extract_items(output)
-			res << hash unless hash.empty?
+			resources_list << hash unless hash.empty?
 		end
-		res
+		resources_list
 	end
 
 	def self.extract_items(xml)
@@ -87,7 +87,7 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
 		args
 	end
 
-  def get_flush_args
+  def get_args
 		args = []
 		self.class.resource_type.validproperties.each do |name|
 			value = resource[name.to_sym] unless name == :ensure
@@ -118,18 +118,10 @@ Puppet::Type.type(:iis_site).provide(:iis_site, :parent => Puppet::Provider::IIS
 		args
   end
 
-	def execute_create
-		appcmd *(['add', self.class.iis_type()] + get_name_arg + get_property_args)
-	end
-
 	def execute_flush
 		if @resource[:ensure] != :absent
-			appcmd *(['set', self.class.iis_type(), resource[:name]] + get_flush_args) unless get_flush_args.empty?
+			appcmd *(['set', self.class.iis_type(), resource[:name]] + get_args) unless get_args.empty?
 		end
-	end
-
-	def get_name_arg
-		["/site.name:#{resource[:name]}"]
 	end
 
 end

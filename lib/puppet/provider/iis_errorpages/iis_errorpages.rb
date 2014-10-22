@@ -36,18 +36,23 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
       end
     end
   end
-  
+
   def self.list(resources)
-    res = []
+    resources_list = []
+
     resources.each do |name, resource|
       command_and_args = [command(:appcmd), 'list', 'config', name, '/section:system.webServer/httpErrors']
       command_line = command_and_args.flatten.map(&:to_s).join(" ")
 
       output = execute(command_and_args, :failonfail => false)
       raise Puppet::ExecutionFailure, "Execution of '#{command_line}' failed" if output.nil? or output.length == 0
-      res << extract_item(output).merge({:name => name})
+      resources_list << extract_item(output).merge(
+        {:name     => name,
+         :provider => self.name,
+         :ensure   => :present }
+      )
     end
-    res
+    resources_list
   end
 
   def self.extract_item(items_xml)
@@ -56,8 +61,6 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
       item_xml.each_element("descendant-or-self::*") do |element|
         (hash[:error_pages] ||= []) << Hash[element.attributes.map{|k,v| [k,v]}]
       end
-      hash[:provider] = self.name
-      hash[:ensure] = :present
     end
     hash
   end
