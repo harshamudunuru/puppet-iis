@@ -142,4 +142,12 @@ Puppet::Type.newtype(:iis_config) do
     desc "system.webServer/staticContent"
   end
 
+  newproperty(:nocompressionforhttp10, :parent => Puppet::IisProperty) do
+    desc "system.webServer/httpCompression"
+  end
+
+  newproperty(:nocompressionforproxies, :parent => Puppet::IisProperty) do
+    desc "system.webServer/httpCompression"
+  end
+
 end
