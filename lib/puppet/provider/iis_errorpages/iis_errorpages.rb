@@ -39,7 +39,7 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
 
   def self.list(resources)
     resources_list = []
-
+	
     resources.each do |name, resource|
       command_and_args = [command(:appcmd), 'list', 'config', name, '/section:system.webServer/httpErrors']
       command_line = command_and_args.flatten.map(&:to_s).join(" ")
@@ -52,6 +52,7 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
          :ensure   => :present }
       )
     end
+
     resources_list
   end
 
@@ -67,32 +68,34 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
 
   def get_complex_property_arg(name, error_pages_to_add)
     args = nil
-
+	
     case name
     when :error_pages
+	  current_errorpages = self.class.list({resource[:name] => {}})[0][:error_pages]
+	
 	  stringify_statuscode!(error_pages_to_add)
 	  strinfiy_substatuscode!(error_pages_to_add)
-	  stringify_statuscode!(@initial_properties[:error_pages])
-	  strinfiy_substatuscode!(@initial_properties[:error_pages])
+	  stringify_statuscode!(current_errorpages)
+	  strinfiy_substatuscode!(current_errorpages)
 	  
-	  to_remove = @initial_properties[:error_pages].select do |existing_error_page| 
+	  to_remove = current_errorpages.select do |existing_error_page| 
 		error_page_for_statuscode_exists = found_error_page_with_same_statuscode_as_we_are_adding(error_pages_to_add, existing_error_page)
 		existing_error_page_not_same = !error_pages_to_add.include?(existing_error_page)
-		
-		error_page_for_statuscode_exists && existing_error_page_not_same
-	  end
 
-      to_add = error_pages_to_add.reject{|x| if @initial_properties[:error_pages].include?(x); x end}
+		error_page_for_statuscode_exists && existing_error_page_not_same
+	  end 
+
+      to_add = error_pages_to_add.reject{|x| if current_errorpages.include?(x); x end}
 
       to_remove.map do |page|
         (args ||= []) << "\"/-[" + page.map{|k,v| "#{k}='#{v}'" if k =~ /statusCode/i}.join('') + "]\""
-      end unless to_remove.empty?
+      end unless to_remove.nil? || to_remove.empty?
 
       to_add.map do |page|
         (args ||= []) << "\"/+[" + page.map{|k,v| "#{k}='#{v}'"}.join(',') + "]\""
       end
     end
-
+	
     args
   end
   
