@@ -74,15 +74,15 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
 	  current_errorpages = self.class.list({resource[:name] => {}})[0][:error_pages]
 	
 	  stringify_statuscode!(error_pages_to_add)
-	  strinfiy_substatuscode!(error_pages_to_add)
+	  stringify_substatuscode!(error_pages_to_add)
 	  stringify_statuscode!(current_errorpages)
-	  strinfiy_substatuscode!(current_errorpages)
+	  stringify_substatuscode!(current_errorpages)
 	  
 	  to_remove = current_errorpages.select do |existing_error_page| 
-		error_page_for_statuscode_exists = found_error_page_with_same_statuscode_as_we_are_adding(error_pages_to_add, existing_error_page)
-		existing_error_page_not_same = !error_pages_to_add.include?(existing_error_page)
+		already_exists = found_error_page_with_same_statuscode_as_we_are_adding(error_pages_to_add, existing_error_page)
+		not_the_same = !error_pages_to_add.include?(existing_error_page)
 
-		error_page_for_statuscode_exists && existing_error_page_not_same
+		already_exists && not_the_same
 	  end 
 
       to_add = error_pages_to_add.reject{|x| if current_errorpages.include?(x); x end}
@@ -127,7 +127,7 @@ Puppet::Type.type(:iis_errorpages).provide(:iis_errorpages, :parent => Puppet::P
   # The subStatusCode can come over as an integer. Convert it to a string 
   # so that when comparing, we know we're comparing apples to apples.
   # [error_pages] The array of hashes where each hash is the custom error page
-  def strinfiy_substatuscode!(error_pages)
+  def stringify_substatuscode!(error_pages)
     return if error_pages.nil?
     error_pages.each do |error_page| 
 	  if !error_page['subStatusCode'].nil?
